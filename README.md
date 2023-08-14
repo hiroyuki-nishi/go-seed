@@ -1,1 +1,3 @@
-# go-seed
+install
+
+go mod tidy -e

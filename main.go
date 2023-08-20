@@ -24,27 +24,31 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// SQL文の構築
-	sql := "SELECT user_id, user_password FROM TEST_USER WHERE user_id=$1;"
-
-	// preparedstatement の生成
-	pstatement, err := Db.Prepare(sql)
+	// userテーブルから全件取得します
+	rows, err := Db.Query("SELECT * FROM TEST_USER")
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
-	// 検索パラメータ（ユーザID）
-	queryID := 1
-	// 検索結果格納用の TestUser
-	var testUser TestUser
+	// 取得したデータを処理します
+	for rows.Next() {
+		var user_id int
+		var user_password string
+		//var email string
+		// 必要なカラムに対応する変数を定義します
 
-	// queryID を埋め込み SQL の実行、検索結果1件の取得
-	err = pstatement.QueryRow(queryID).Scan(&testUser.UserID, &testUser.Password)
+		err := rows.Scan(&user_id, &user_password)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// 取得したデータを利用して処理を行います
+		fmt.Printf("ID: %d, Username: %s\n", user_id, user_password)
+	}
+
+	// エラーチェック
+	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// 検索結果の表示
-	fmt.Println(testUser.UserID, testUser.Password)
 }
